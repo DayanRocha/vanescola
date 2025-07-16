@@ -1,6 +1,8 @@
 
+import { useState } from 'react';
 import { User, School as SchoolIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Student, School } from '@/types/driver';
 
 interface EditInfoPageProps {
@@ -11,7 +13,15 @@ interface EditInfoPageProps {
 }
 
 export const EditInfoPage = ({ onBack, onConfirm, selectedItem, type }: EditInfoPageProps) => {
+  const [selectedDirection, setSelectedDirection] = useState<'embarque' | 'desembarque' | null>(null);
+
   if (!selectedItem) return null;
+
+  const handleConfirm = () => {
+    if (selectedDirection) {
+      onConfirm(selectedDirection);
+    }
+  };
 
   return (
     <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #FF8C00 0%, #FFA500 100%)' }}>
@@ -58,29 +68,25 @@ export const EditInfoPage = ({ onBack, onConfirm, selectedItem, type }: EditInfo
           {type === 'student' && (
             <div className="mb-6">
               <h4 className="font-medium text-gray-700 mb-3">Direção</h4>
-              <div className="space-y-3">
-                <Button
-                  onClick={() => onConfirm('embarque')}
-                  className="w-full justify-start text-left"
-                  variant="outline"
-                >
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 border border-blue-500 rounded-full mr-3"></div>
+              <RadioGroup 
+                value={selectedDirection || ''} 
+                onValueChange={(value) => setSelectedDirection(value as 'embarque' | 'desembarque')}
+                className="space-y-3"
+              >
+                <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50">
+                  <RadioGroupItem value="embarque" id="embarque" />
+                  <label htmlFor="embarque" className="cursor-pointer flex-1">
                     Embarque em casa
-                  </div>
-                </Button>
+                  </label>
+                </div>
                 
-                <Button
-                  onClick={() => onConfirm('desembarque')}
-                  className="w-full justify-start text-left"
-                  variant="outline"
-                >
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 border border-blue-500 rounded-full mr-3"></div>
+                <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50">
+                  <RadioGroupItem value="desembarque" id="desembarque" />
+                  <label htmlFor="desembarque" className="cursor-pointer flex-1">
                     Desembarque em casa
-                  </div>
-                </Button>
-              </div>
+                  </label>
+                </div>
+              </RadioGroup>
             </div>
           )}
 
@@ -90,8 +96,9 @@ export const EditInfoPage = ({ onBack, onConfirm, selectedItem, type }: EditInfo
 
           <div className="space-y-3">
             <Button 
-              onClick={() => onConfirm('embarque')}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+              onClick={handleConfirm}
+              disabled={type === 'student' && !selectedDirection}
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
               Confirmar
             </Button>
