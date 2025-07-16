@@ -18,10 +18,18 @@ export const EditInfoPage = ({ onBack, onConfirm, selectedItem, type }: EditInfo
   if (!selectedItem) return null;
 
   const handleConfirm = () => {
-    if (selectedDirection) {
+    if (type === 'school') {
+      // Para escolas, podemos usar 'embarque' como padrão ou não precisar de direção
+      onConfirm('embarque');
+    } else if (selectedDirection) {
+      // Para estudantes, precisa ter direção selecionada
       onConfirm(selectedDirection);
     }
   };
+
+  // Para escolas, o botão sempre deve estar habilitado
+  // Para estudantes, só habilita se tiver direção selecionada
+  const isConfirmDisabled = type === 'student' && !selectedDirection;
 
   return (
     <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #FF8C00 0%, #FFA500 100%)' }}>
@@ -82,7 +90,7 @@ export const EditInfoPage = ({ onBack, onConfirm, selectedItem, type }: EditInfo
                 
                 <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50">
                   <RadioGroupItem value="desembarque" id="desembarque" />
-                  <label htmlFor="desembarque" className="cursor-pointer flex-1">
+                  <label htmlFor="desembarque" className="cursor-pointer flex-1"> 
                     Desembarque em casa
                   </label>
                 </div>
@@ -90,14 +98,26 @@ export const EditInfoPage = ({ onBack, onConfirm, selectedItem, type }: EditInfo
             </div>
           )}
 
-          <div className="text-center text-sm text-gray-500 mb-6">
-            Tempo aproximado do evento
-          </div>
+          {/* Info text for schools */}
+          {type === 'school' && (
+            <div className="mb-6">
+              <div className="text-center text-sm text-gray-500">
+                Parada na escola
+              </div>
+            </div>
+          )}
+
+          {/* Time info */}
+          {type === 'student' && (
+            <div className="text-center text-sm text-gray-500 mb-6">
+              Tempo aproximado do evento
+            </div>
+          )}
 
           <div className="space-y-3">
             <Button 
               onClick={handleConfirm}
-              disabled={type === 'student' && !selectedDirection}
+              disabled={isConfirmDisabled}
               className="w-full bg-blue-500 hover:bg-blue-600 text-white disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
               Confirmar
