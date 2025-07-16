@@ -10,6 +10,7 @@ import { RoutesList } from '@/components/RoutesList';
 import { RoutesListPage } from '@/components/RoutesListPage';
 import { RouteFormPage } from '@/components/RouteFormPage';
 import { RouteSetupPage } from '@/components/RouteSetupPage';
+import { RouteExecutionPage } from '@/components/RouteExecutionPage';
 import { StudentsList } from '@/components/StudentsList';
 import { StudentRegistration } from '@/components/StudentRegistration';
 import { GuardiansList } from '@/components/GuardiansList';
@@ -38,6 +39,8 @@ export default function DriverApp() {
   const [showRoutesListPage, setShowRoutesListPage] = useState(false);
   const [showRouteFormPage, setShowRouteFormPage] = useState(false);
   const [showRouteSetupPage, setShowRouteSetupPage] = useState(false);
+  const [showRouteExecutionPage, setShowRouteExecutionPage] = useState(false);
+  const [executingRoute, setExecutingRoute] = useState<Route | null>(null);
 
   const {
     driver,
@@ -78,6 +81,7 @@ export default function DriverApp() {
     setShowRoutesListPage(false);
     setShowRouteFormPage(false);
     setShowRouteSetupPage(false);
+    setShowRouteExecutionPage(false);
     
     if (tab === 'routes') {
       setShowRouteForm(false);
@@ -113,6 +117,7 @@ export default function DriverApp() {
     setShowRoutesListPage(false);
     setShowRouteFormPage(false);
     setShowRouteSetupPage(false);
+    setShowRouteExecutionPage(false);
   };
 
   const handleClientsClick = () => {
@@ -149,6 +154,19 @@ export default function DriverApp() {
   const handleEditRoute = (route: Route) => {
     setEditingRoute(route);
     setShowRouteForm(true);
+  };
+
+  const handleExecuteRoute = (routeId: string) => {
+    const route = routes.find(r => r.id === routeId);
+    if (route) {
+      setExecutingRoute(route);
+      setShowRouteExecutionPage(true);
+    }
+  };
+
+  const handleBackFromRouteExecution = () => {
+    setShowRouteExecutionPage(false);
+    setExecutingRoute(null);
   };
 
   const handleSaveStudent = (studentData: {
@@ -231,11 +249,24 @@ export default function DriverApp() {
   const handleRouteSetupSave = () => {
     setShowRouteSetupPage(false);
     setShowRoutesListPage(true);
-    // Here you would save the route data
     console.log('🚐 Rota cadastrada com sucesso! Redirecionando para "suas rotas"...');
   };
 
   const renderContent = () => {
+    if (showRouteExecutionPage) {
+      return (
+        <RouteExecutionPage
+          route={executingRoute}
+          students={students}
+          schools={schools}
+          onBack={handleBackFromRouteExecution}
+          onAddStudent={() => setShowStudentForm(true)}
+          onAddSchool={() => setShowSchoolForm(true)}
+          onRemoveStudent={(studentId) => console.log('Remove student:', studentId)}
+        />
+      );
+    }
+
     if (showRoutesListPage) {
       return (
         <RoutesListPage
@@ -351,6 +382,7 @@ export default function DriverApp() {
               onDelete={deleteRoute}
               hasActiveTrip={!!activeTrip}
               onBack={handleBackToHome}
+              onExecuteRoute={handleExecuteRoute}
             />
             <div className="fixed bottom-4 right-4">
               <button

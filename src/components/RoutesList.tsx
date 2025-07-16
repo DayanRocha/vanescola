@@ -2,6 +2,14 @@
 import { Edit, Play, Trash2, Clock, Calendar, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Route } from '@/types/driver';
+import { 
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer';
+import { useState } from 'react';
 
 interface RoutesListProps {
   routes: Route[];
@@ -10,6 +18,7 @@ interface RoutesListProps {
   onDelete: (routeId: string) => void;
   hasActiveTrip: boolean;
   onBack: () => void;
+  onExecuteRoute: (routeId: string) => void;
 }
 
 const weekDayLabels: Record<string, string> = {
@@ -22,7 +31,42 @@ const weekDayLabels: Record<string, string> = {
   'Sun': 'Dom'
 };
 
-export const RoutesList = ({ routes, onEdit, onStart, onDelete, hasActiveTrip, onBack }: RoutesListProps) => {
+export const RoutesList = ({ 
+  routes, 
+  onEdit, 
+  onStart, 
+  onDelete, 
+  hasActiveTrip, 
+  onBack,
+  onExecuteRoute 
+}: RoutesListProps) => {
+  const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const handleRouteClick = (route: Route) => {
+    setSelectedRoute(route);
+    setDrawerOpen(true);
+  };
+
+  const handleExecuteRoute = () => {
+    if (selectedRoute) {
+      onExecuteRoute(selectedRoute.id);
+      setDrawerOpen(false);
+    }
+  };
+
+  const handleEditRoute = () => {
+    if (selectedRoute) {
+      onEdit(selectedRoute);
+      setDrawerOpen(false);
+    }
+  };
+
+  const handleCancelRoute = () => {
+    setDrawerOpen(false);
+    setSelectedRoute(null);
+  };
+
   return (
     <div className="p-6 max-w-md mx-auto">
       <div className="flex items-center gap-3 mb-6">
@@ -41,62 +85,71 @@ export const RoutesList = ({ routes, onEdit, onStart, onDelete, hasActiveTrip, o
       ) : (
         <div className="space-y-4">
           {routes.map((route) => (
-            <div key={route.id} className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <h3 className="font-semibold text-gray-800">{route.name}</h3>
-                  <div className="flex items-center text-sm text-gray-600 mt-1">
-                    <Clock className="w-4 h-4 mr-1" />
-                    {route.startTime}
+            <Drawer key={route.id} open={drawerOpen && selectedRoute?.id === route.id} onOpenChange={setDrawerOpen}>
+              <DrawerTrigger asChild>
+                <div 
+                  onClick={() => handleRouteClick(route)}
+                  className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="font-semibold text-gray-800">{route.name}</h3>
+                      <div className="flex items-center text-sm text-gray-600 mt-1">
+                        <Clock className="w-4 h-4 mr-1" />
+                        {route.startTime}
+                      </div>
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {route.students.length} alunos
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-1">
+                    {route.weekDays.map((day) => (
+                      <span
+                        key={day}
+                        className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded"
+                      >
+                        {weekDayLabels[day]}
+                      </span>
+                    ))}
                   </div>
                 </div>
-                <div className="text-sm text-gray-500">
-                  {route.students.length} alunos
-                </div>
-              </div>
-              
-              <div className="flex flex-wrap gap-1 mb-3">
-                {route.weekDays.map((day) => (
-                  <span
-                    key={day}
-                    className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded"
+              </DrawerTrigger>
+
+              <DrawerContent className="max-h-[400px]">
+                <DrawerHeader className="text-center">
+                  <DrawerTitle className="text-xl font-bold text-gray-800">
+                    {selectedRoute?.name}
+                  </DrawerTitle>
+                </DrawerHeader>
+
+                <div className="p-4 space-y-3">
+                  <Button
+                    onClick={handleExecuteRoute}
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 text-lg font-semibold"
                   >
-                    {weekDayLabels[day]}
-                  </span>
-                ))}
-              </div>
-              
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => onEdit(route)}
-                  variant="outline"
-                  size="sm"
-                  className="flex-1"
-                >
-                  <Edit className="w-4 h-4 mr-1" />
-                  Editar
-                </Button>
-                
-                <Button
-                  onClick={() => onStart(route.id)}
-                  disabled={hasActiveTrip}
-                  size="sm"
-                  className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-300"
-                >
-                  <Play className="w-4 h-4 mr-1" />
-                  Iniciar
-                </Button>
-                
-                <Button
-                  onClick={() => onDelete(route.id)}
-                  variant="outline"
-                  size="sm"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
+                    Executar rota
+                  </Button>
+
+                  <Button
+                    onClick={handleEditRoute}
+                    variant="outline"
+                    className="w-full border-orange-500 text-orange-500 hover:bg-orange-50 py-4 text-lg font-semibold"
+                  >
+                    Editar informações
+                  </Button>
+
+                  <Button
+                    onClick={handleCancelRoute}
+                    variant="outline"
+                    className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 py-4 text-lg font-semibold"
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </DrawerContent>
+            </Drawer>
           ))}
         </div>
       )}
