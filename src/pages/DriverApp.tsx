@@ -18,6 +18,7 @@ import { GuardianRegistration } from '@/components/GuardianRegistration';
 import { SchoolsList } from '@/components/SchoolsList';
 import { SchoolRegistration } from '@/components/SchoolRegistration';
 import { ActiveTrip } from '@/components/ActiveTrip';
+import { BottomNavigation } from '@/components/BottomNavigation';
 import { useDriverData } from '@/hooks/useDriverData';
 import { Route, Student, Guardian, School as SchoolType } from '@/types/driver';
 
@@ -491,7 +492,14 @@ export default function DriverApp() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {renderContent()}
+      <div className="pb-20">
+        {renderContent()}
+      </div>
+      <BottomNavigation 
+        activeTab={activeTab} 
+        onTabChange={handleTabChange} 
+        hasActiveTrip={!!activeTrip}
+      />
     </div>
   );
 }
