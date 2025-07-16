@@ -232,6 +232,7 @@ export default function DriverApp() {
     setShowRouteSetupPage(false);
     setShowRoutesListPage(true);
     // Here you would save the route data
+    console.log('🚐 Rota cadastrada com sucesso! Redirecionando para "suas rotas"...');
   };
 
   const renderContent = () => {

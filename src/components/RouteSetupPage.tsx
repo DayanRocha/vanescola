@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { ArrowLeft, Info, UserPlus, School, Plus } from 'lucide-react';
+import { ArrowLeft, Info, UserPlus, School, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StudentSelectionDialog } from './StudentSelectionDialog';
 import { EditInfoPage } from './EditInfoPage';
@@ -50,11 +50,13 @@ export const RouteSetupPage = ({
 
   const handleStudentSelect = (student: Student) => {
     setSelectedItem(student);
+    setShowSelectionDialog(false);
     setShowEditInfo(true);
   };
 
   const handleSchoolSelect = (school: SchoolType) => {
     setSelectedItem(school);
+    setShowSelectionDialog(false);
     setShowEditInfo(true);
   };
 
@@ -68,9 +70,12 @@ export const RouteSetupPage = ({
       };
       setRouteItems(prev => [...prev, newRouteItem]);
       setShowEditInfo(false);
-      setShowRouteMounting(true);
       setSelectedItem(null);
     }
+  };
+
+  const handleRemoveItem = (itemId: string) => {
+    setRouteItems(prev => prev.filter(item => item.id !== itemId));
   };
 
   const handleBackFromEditInfo = () => {
@@ -80,6 +85,11 @@ export const RouteSetupPage = ({
 
   const handleBackFromRouteMounting = () => {
     setShowRouteMounting(false);
+  };
+
+  const handleSaveRoute = () => {
+    // Salva a rota e redireciona
+    onSave();
   };
 
   if (showRouteMounting) {
@@ -134,9 +144,48 @@ export const RouteSetupPage = ({
           </div>
         </div>
 
-        {/* Route Items */}
+        {/* Route Items List */}
+        {routeItems.length > 0 && (
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">Itens Adicionados</h2>
+            <div className="space-y-3">
+              {routeItems.map((routeItem, index) => (
+                <div key={routeItem.id} className="bg-white rounded-lg p-4 shadow-sm border">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-semibold">
+                        {index + 1}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {routeItem.type === 'student' ? (
+                          <UserPlus className="w-5 h-5 text-green-600" />
+                        ) : (
+                          <School className="w-5 h-5 text-purple-600" />
+                        )}
+                        <div>
+                          <p className="font-medium text-gray-800">{routeItem.item.name}</p>
+                          {routeItem.type === 'student' && routeItem.direction && (
+                            <p className="text-sm text-gray-600 capitalize">{routeItem.direction}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleRemoveItem(routeItem.id)}
+                      className="text-red-500 hover:text-red-700 p-1"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Add Items Section */}
         <div className="mb-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Itens da Rota</h2>
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">Adicionar Itens à Rota</h2>
           
           <div className="space-y-3">
             <Button
@@ -168,7 +217,7 @@ export const RouteSetupPage = ({
         {/* Action Buttons */}
         <div className="space-y-3">
           <Button
-            onClick={onSave}
+            onClick={handleSaveRoute}
             className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3"
           >
             Cadastrar Rota
