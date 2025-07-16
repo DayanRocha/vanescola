@@ -44,25 +44,31 @@ export const RoutesList = ({
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const handleRouteClick = (route: Route) => {
+    console.log('Route clicked:', route.name);
     setSelectedRoute(route);
     setDrawerOpen(true);
   };
 
   const handleExecuteRoute = () => {
     if (selectedRoute) {
+      console.log('Executing route:', selectedRoute.name);
       onExecuteRoute(selectedRoute.id);
       setDrawerOpen(false);
+      setSelectedRoute(null);
     }
   };
 
   const handleEditRoute = () => {
     if (selectedRoute) {
+      console.log('Editing route:', selectedRoute.name);
       onEdit(selectedRoute);
       setDrawerOpen(false);
+      setSelectedRoute(null);
     }
   };
 
   const handleCancelRoute = () => {
+    console.log('Canceling route menu');
     setDrawerOpen(false);
     setSelectedRoute(null);
   };
@@ -85,74 +91,74 @@ export const RoutesList = ({
       ) : (
         <div className="space-y-4">
           {routes.map((route) => (
-            <Drawer key={route.id} open={drawerOpen && selectedRoute?.id === route.id} onOpenChange={setDrawerOpen}>
-              <DrawerTrigger asChild>
-                <div 
-                  onClick={() => handleRouteClick(route)}
-                  className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
-                >
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h3 className="font-semibold text-gray-800">{route.name}</h3>
-                      <div className="flex items-center text-sm text-gray-600 mt-1">
-                        <Clock className="w-4 h-4 mr-1" />
-                        {route.startTime}
-                      </div>
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {route.students.length} alunos
+            <div key={route.id}>
+              <div 
+                onClick={() => handleRouteClick(route)}
+                className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 className="font-semibold text-gray-800">{route.name}</h3>
+                    <div className="flex items-center text-sm text-gray-600 mt-1">
+                      <Clock className="w-4 h-4 mr-1" />
+                      {route.startTime}
                     </div>
                   </div>
-                  
-                  <div className="flex flex-wrap gap-1">
-                    {route.weekDays.map((day) => (
-                      <span
-                        key={day}
-                        className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded"
-                      >
-                        {weekDayLabels[day]}
-                      </span>
-                    ))}
+                  <div className="text-sm text-gray-500">
+                    {route.students.length} alunos
                   </div>
                 </div>
-              </DrawerTrigger>
-
-              <DrawerContent className="max-h-[400px]">
-                <DrawerHeader className="text-center">
-                  <DrawerTitle className="text-xl font-bold text-gray-800">
-                    {selectedRoute?.name}
-                  </DrawerTitle>
-                </DrawerHeader>
-
-                <div className="p-4 space-y-3">
-                  <Button
-                    onClick={handleExecuteRoute}
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 text-lg font-semibold"
-                  >
-                    Executar rota
-                  </Button>
-
-                  <Button
-                    onClick={handleEditRoute}
-                    variant="outline"
-                    className="w-full border-orange-500 text-orange-500 hover:bg-orange-50 py-4 text-lg font-semibold"
-                  >
-                    Editar informações
-                  </Button>
-
-                  <Button
-                    onClick={handleCancelRoute}
-                    variant="outline"
-                    className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 py-4 text-lg font-semibold"
-                  >
-                    Cancelar
-                  </Button>
+                
+                <div className="flex flex-wrap gap-1">
+                  {route.weekDays.map((day) => (
+                    <span
+                      key={day}
+                      className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded"
+                    >
+                      {weekDayLabels[day]}
+                    </span>
+                  ))}
                 </div>
-              </DrawerContent>
-            </Drawer>
+              </div>
+            </div>
           ))}
         </div>
       )}
+
+      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+        <DrawerContent className="max-h-[400px]">
+          <DrawerHeader className="text-center">
+            <DrawerTitle className="text-xl font-bold text-gray-800">
+              {selectedRoute?.name}
+            </DrawerTitle>
+          </DrawerHeader>
+
+          <div className="p-4 space-y-3">
+            <Button
+              onClick={handleExecuteRoute}
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 text-lg font-semibold"
+            >
+              Executar rota
+            </Button>
+
+            <Button
+              onClick={handleEditRoute}
+              variant="outline"
+              className="w-full border-orange-500 text-orange-500 hover:bg-orange-50 py-4 text-lg font-semibold"
+            >
+              Editar informações
+            </Button>
+
+            <Button
+              onClick={handleCancelRoute}
+              variant="outline"
+              className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 py-4 text-lg font-semibold"
+            >
+              Cancelar
+            </Button>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 };
