@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { HomePage } from '@/components/HomePage';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ClientsPage } from '@/components/ClientsPage';
 import { DriversPage } from '@/components/DriversPage';
 import { SettingsPage } from '@/components/SettingsPage';
@@ -23,7 +23,9 @@ import { useDriverData } from '@/hooks/useDriverData';
 import { Route, Student, Guardian, School as SchoolType } from '@/types/driver';
 
 export default function DriverApp() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('home');
+  const [navigationStack, setNavigationStack] = useState<string[]>(['home']);
   const [showRouteForm, setShowRouteForm] = useState(false);
   const [showStudentForm, setShowStudentForm] = useState(false);
   const [showGuardianForm, setShowGuardianForm] = useState(false);
@@ -42,6 +44,72 @@ export default function DriverApp() {
   const [showRouteSetupPage, setShowRouteSetupPage] = useState(false);
   const [showRouteExecutionPage, setShowRouteExecutionPage] = useState(false);
   const [executingRoute, setExecutingRoute] = useState<Route | null>(null);
+
+  const addToNavigationStack = (screen: string) => {
+    setNavigationStack(prev => [...prev, screen]);
+    // Add to browser history
+    window.history.pushState({ screen }, '', '/');
+  };
+
+  const handleBackNavigation = () => {
+    if (navigationStack.length > 1) {
+      const newStack = navigationStack.slice(0, -1);
+      const previousScreen = newStack[newStack.length - 1];
+      
+      setNavigationStack(newStack);
+      
+      // Reset all states first
+      setShowStudentForm(false);
+      setShowGuardianForm(false);
+      setShowSchoolForm(false);
+      setShowRouteForm(false);
+      setShowRoutesListPage(false);
+      setShowRouteFormPage(false);
+      setShowRouteSetupPage(false);
+      setShowRouteExecutionPage(false);
+      setEditingStudent(null);
+      setEditingGuardian(null);
+      setEditingSchool(null);
+      setEditingRoute(null);
+      setExecutingRoute(null);
+      setShowClients(false);
+      setShowDrivers(false);
+      setShowSettings(false);
+      setActiveTopButton(null);
+
+      // Navigate to the specific screen
+      switch (previousScreen) {
+        case 'clients':
+          setShowClients(true);
+          setActiveTopButton('clients');
+          break;
+        case 'drivers':
+          setShowDrivers(true);
+          setActiveTopButton('drivers');
+          break;
+        case 'settings':
+          setShowSettings(true);
+          setActiveTopButton('settings');
+          break;
+        default:
+          setActiveTab(previousScreen);
+          break;
+      }
+    }
+  };
+
+  // Handle browser back button
+  useEffect(() => {
+    const handlePopState = () => {
+      handleBackNavigation();
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
 
   const {
     driver,
@@ -67,79 +135,69 @@ export default function DriverApp() {
     updateSchool
   } = useDriverData();
 
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-    setShowClients(false);
-    setShowDrivers(false);
-    setShowSettings(false);
-    setActiveTopButton(null);
-    
-    if (tab === 'routes-list') {
-      setShowRoutesListPage(true);
-      return;
-    }
-    
-    setShowRoutesListPage(false);
-    setShowRouteFormPage(false);
-    setShowRouteSetupPage(false);
-    setShowRouteExecutionPage(false);
-    
-    if (tab === 'routes') {
-      setShowRouteForm(false);
-      setEditingRoute(null);
-    }
-    if (tab === 'students') {
-      setShowStudentForm(false);
-      setEditingStudent(null);
-    }
-    if (tab === 'guardians') {
-      setShowGuardianForm(false);
-      setEditingGuardian(null);
-    }
-    if (tab === 'schools') {
-      setShowSchoolForm(false);
-      setEditingSchool(null);
-    }
-  };
-
-  const handleBackToHome = () => {
-    setShowClients(false);
-    setShowDrivers(false);
-    setShowSettings(false);
-    setActiveTopButton(null);
-    setActiveTab('home');
+  const navigateToScreen = (screen: string) => {
+    // Reset all states first
     setShowStudentForm(false);
     setShowGuardianForm(false);
     setShowSchoolForm(false);
-    setEditingStudent(null);
-    setEditingGuardian(null);
-    setEditingSchool(null);
-    
+    setShowRouteForm(false);
     setShowRoutesListPage(false);
     setShowRouteFormPage(false);
     setShowRouteSetupPage(false);
     setShowRouteExecutionPage(false);
+    setEditingStudent(null);
+    setEditingGuardian(null);
+    setEditingSchool(null);
+    setEditingRoute(null);
+    setExecutingRoute(null);
+    setShowClients(false);
+    setShowDrivers(false);
+    setShowSettings(false);
+    setActiveTopButton(null);
+
+    // Navigate to the specific screen
+    switch (screen) {
+      case 'clients':
+        setShowClients(true);
+        setActiveTopButton('clients');
+        break;
+      case 'drivers':
+        setShowDrivers(true);
+        setActiveTopButton('drivers');
+        break;
+      case 'settings':
+        setShowSettings(true);
+        setActiveTopButton('settings');
+        break;
+      default:
+        setActiveTab(screen);
+        break;
+    }
+  };
+
+  const handleTabChange = (tab: string) => {
+    addToNavigationStack(tab);
+    navigateToScreen(tab);
+  };
+
+  const handleBackToHome = () => {
+    setNavigationStack(['home']);
+    navigateToScreen('home');
   };
 
   const handleClientsClick = () => {
-    setShowClients(true);
-    setShowDrivers(false);
-    setShowSettings(false);
-    setActiveTopButton('clients');
+    addToNavigationStack('clients');
+    navigateToScreen('clients');
   };
 
   const handleDriversClick = () => {
-    setShowDrivers(true);
-    setShowClients(false);
-    setShowSettings(false);
-    setActiveTopButton('drivers');
+    addToNavigationStack('drivers');
+    navigateToScreen('drivers');
   };
 
   const handleSettingsClick = () => {
-    setShowSettings(true);
-    setShowClients(false);
-    setShowDrivers(false);
-    setActiveTopButton('settings');
+    addToNavigationStack('settings');
+    navigateToScreen('settings');
   };
 
   const handleSaveRoute = (routeData: Omit<Route, 'id'>) => {
@@ -190,6 +248,7 @@ export default function DriverApp() {
   const handleEditStudent = (student: Student) => {
     setEditingStudent(student);
     setShowStudentForm(true);
+    addToNavigationStack('student-form');
   };
 
   const handleSaveGuardian = (guardianData: { name: string; email: string }) => {
@@ -205,6 +264,7 @@ export default function DriverApp() {
   const handleEditGuardian = (guardian: Guardian) => {
     setEditingGuardian(guardian);
     setShowGuardianForm(true);
+    addToNavigationStack('guardian-form');
   };
 
   const handleSaveSchool = (schoolData: { name: string; address: string }) => {
@@ -220,6 +280,7 @@ export default function DriverApp() {
   const handleEditSchool = (school: SchoolType) => {
     setEditingSchool(school);
     setShowSchoolForm(true);
+    addToNavigationStack('school-form');
   };
 
   const handleRoutesListBack = () => {
@@ -343,8 +404,9 @@ export default function DriverApp() {
     switch (activeTab) {
       case 'home':
         return (
-          <HomePage 
+          <ClientsPage 
             onTabChange={handleTabChange} 
+            onBack={handleBackToHome}
             onClientsClick={handleClientsClick} 
             onDriversClick={handleDriversClick}
             onSettingsClick={handleSettingsClick}
@@ -353,10 +415,10 @@ export default function DriverApp() {
         );
         
       case 'profile':
-        return <DriverProfile driver={driver} onUpdate={updateDriver} onBack={handleBackToHome} />;
+        return <DriverProfile driver={driver} onUpdate={updateDriver} onBack={handleBackNavigation} />;
         
       case 'van':
-        return <VanRegistration van={van} onUpdate={updateVan} onBack={handleBackToHome} />;
+        return <VanRegistration van={van} onUpdate={updateVan} onBack={handleBackNavigation} />;
         
       case 'routes':
         if (showRouteForm || editingRoute) {
@@ -370,6 +432,7 @@ export default function DriverApp() {
               onBack={() => {
                 setShowRouteForm(false);
                 setEditingRoute(null);
+                handleBackNavigation();
               }}
             />
           );
@@ -382,12 +445,15 @@ export default function DriverApp() {
               onStart={startTrip}
               onDelete={deleteRoute}
               hasActiveTrip={!!activeTrip}
-              onBack={handleBackToHome}
+              onBack={handleBackNavigation}
               onExecuteRoute={handleExecuteRoute}
             />
             <div className="fixed bottom-4 right-4">
               <button
-                onClick={() => setShowRouteForm(true)}
+                onClick={() => {
+                  setShowRouteForm(true);
+                  addToNavigationStack('route-form');
+                }}
                 className="w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-colors"
               >
                 <span className="text-2xl">+</span>
@@ -406,6 +472,7 @@ export default function DriverApp() {
               onBack={() => {
                 setShowStudentForm(false);
                 setEditingStudent(null);
+                handleBackNavigation();
               }}
               editingStudent={editingStudent}
             />
@@ -415,8 +482,11 @@ export default function DriverApp() {
           <StudentsList 
             students={students} 
             schools={schools} 
-            onBack={handleBackToHome}
-            onAddStudent={() => setShowStudentForm(true)}
+            onBack={handleBackNavigation}
+            onAddStudent={() => {
+              setShowStudentForm(true);
+              addToNavigationStack('student-form');
+            }}
             onEditStudent={handleEditStudent}
           />
         );
@@ -429,6 +499,7 @@ export default function DriverApp() {
               onBack={() => {
                 setShowGuardianForm(false);
                 setEditingGuardian(null);
+                handleBackNavigation();
               }}
               editingGuardian={editingGuardian}
             />
@@ -437,8 +508,11 @@ export default function DriverApp() {
         return (
           <GuardiansList 
             guardians={guardians} 
-            onBack={handleBackToHome}
-            onAddGuardian={() => setShowGuardianForm(true)}
+            onBack={handleBackNavigation}
+            onAddGuardian={() => {
+              setShowGuardianForm(true);
+              addToNavigationStack('guardian-form');
+            }}
             onEditGuardian={handleEditGuardian}
           />
         );
@@ -451,6 +525,7 @@ export default function DriverApp() {
               onBack={() => {
                 setShowSchoolForm(false);
                 setEditingSchool(null);
+                handleBackNavigation();
               }}
               editingSchool={editingSchool}
             />
@@ -459,8 +534,11 @@ export default function DriverApp() {
         return (
           <SchoolsList 
             schools={schools} 
-            onBack={handleBackToHome}
-            onAddSchool={() => setShowSchoolForm(true)}
+            onBack={handleBackNavigation}
+            onAddSchool={() => {
+              setShowSchoolForm(true);
+              addToNavigationStack('school-form');
+            }}
             onEditSchool={handleEditSchool}
           />
         );
@@ -473,14 +551,15 @@ export default function DriverApp() {
             schools={schools}
             onUpdateStudentStatus={updateStudentStatus}
             onFinishTrip={finishTrip}
-            onBack={handleBackToHome}
+            onBack={handleBackNavigation}
           />
         );
         
       default:
         return (
-          <HomePage 
+          <ClientsPage 
             onTabChange={handleTabChange} 
+            onBack={handleBackToHome}
             onClientsClick={handleClientsClick} 
             onDriversClick={handleDriversClick}
             onSettingsClick={handleSettingsClick}
