@@ -192,7 +192,7 @@ export default function DriverApp() {
     setShowStudentForm(true);
   };
 
-  const handleSaveGuardian = (guardianData: { name: string }) => {
+  const handleSaveGuardian = (guardianData: { name: string; email: string }) => {
     if (editingGuardian) {
       updateGuardian(editingGuardian.id, guardianData);
       setEditingGuardian(null);

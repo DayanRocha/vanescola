@@ -38,6 +38,7 @@ export interface Student {
 export interface Guardian {
   id: string;
   name: string;
+  email: string;
 }
 
 export interface School {

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, UserCheck } from 'lucide-react';
+import { ArrowLeft, UserCheck, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,30 +8,32 @@ import { Guardian } from '@/types/driver';
 
 interface GuardianRegistrationProps {
   onBack: () => void;
-  onSave: (guardianData: { name: string }) => void;
+  onSave: (guardianData: { name: string; email: string }) => void;
   editingGuardian?: Guardian;
 }
 
 export const GuardianRegistration = ({ onBack, onSave, editingGuardian }: GuardianRegistrationProps) => {
   const [formData, setFormData] = useState({
-    name: ''
+    name: '',
+    email: ''
   });
 
   useEffect(() => {
     if (editingGuardian) {
       setFormData({
-        name: editingGuardian.name
+        name: editingGuardian.name,
+        email: editingGuardian.email
       });
     }
   }, [editingGuardian]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.name.trim()) {
+    if (formData.name.trim() && formData.email.trim()) {
       onSave(formData);
       if (!editingGuardian) {
         // Reset form after save only for new guardians
-        setFormData({ name: '' });
+        setFormData({ name: '', email: '' });
       }
     }
   };
@@ -74,11 +76,28 @@ export const GuardianRegistration = ({ onBack, onSave, editingGuardian }: Guardi
             />
           </div>
 
+          {/* Email */}
+          <div className="space-y-2">
+            <Label htmlFor="email" className="flex items-center gap-2 text-gray-700">
+              <Mail className="w-4 h-4" />
+              Email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => handleChange('email', e.target.value)}
+              placeholder="Digite o email do responsável"
+              required
+              className="w-full"
+            />
+          </div>
+
           {/* Botão Cadastrar/Atualizar */}
           <Button 
             type="submit" 
             className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-            disabled={!formData.name.trim()}
+            disabled={!formData.name.trim() || !formData.email.trim()}
           >
             {editingGuardian ? 'Atualizar Responsável' : 'Cadastrar Responsável'}
           </Button>

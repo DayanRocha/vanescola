@@ -110,17 +110,6 @@ export const VanRegistration = ({ van, onUpdate, onBack }: VanRegistrationProps)
           </div>
 
           <div>
-            <Label htmlFor="year">Ano</Label>
-            <Input
-              id="year"
-              type="number"
-              value={formData.year || ''}
-              onChange={(e) => setFormData(prev => ({ ...prev, year: parseInt(e.target.value) || 0 }))}
-              placeholder="Ex: 2020"
-            />
-          </div>
-
-          <div>
             <Label htmlFor="observations">Observações</Label>
             <Input
               id="observations"
