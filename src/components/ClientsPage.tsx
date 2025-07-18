@@ -21,22 +21,25 @@ export const ClientsPage = ({
 }: ClientsPageProps) => {
   const menuItems = [
     {
-      id: 'students',
-      title: 'Estudantes',
-      icon: Users,
-      description: 'Gerenciar estudantes'
+      id: 'schools',
+      title: 'Escolas',
+      icon: School,
+      description: 'Cadastre primeiro as escolas',
+      step: '1º'
     },
     {
       id: 'guardians',
       title: 'Responsáveis', 
       icon: UserCheck,
-      description: 'Contatos dos responsáveis'
+      description: 'Cadastre os responsáveis dos alunos',
+      step: '2º'
     },
     {
-      id: 'schools',
-      title: 'Escolas',
-      icon: School,
-      description: 'Escolas cadastradas'
+      id: 'students',
+      title: 'Estudantes',
+      icon: Users,
+      description: 'Por último, cadastre os estudantes',
+      step: '3º'
     }
   ];
 
@@ -83,7 +86,14 @@ export const ClientsPage = ({
 
       {/* Main Content */}
       <div className="px-4">
-        <h2 className="text-white text-lg font-medium mb-6">Sobre seus clientes</h2>
+        <h2 className="text-white text-lg font-medium mb-4">Configuração inicial</h2>
+        
+        {/* Instrução */}
+        <div className="bg-white/20 rounded-xl p-4 mb-6">
+          <p className="text-white text-sm leading-relaxed">
+            Para começar, recomendamos seguir esta ordem de cadastro para uma melhor organização:
+          </p>
+        </div>
         
         <div className="space-y-4">
           {menuItems.map((item) => (
@@ -97,7 +107,15 @@ export const ClientsPage = ({
                   <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
                     <item.icon className="w-6 h-6 text-white" />
                   </div>
-                  <span className="text-gray-800 font-medium text-lg">{item.title}</span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded-full font-medium">
+                        {item.step}
+                      </span>
+                      <span className="text-gray-800 font-medium text-lg">{item.title}</span>
+                    </div>
+                    <p className="text-gray-500 text-sm mt-1">{item.description}</p>
+                  </div>
                 </div>
                 <div className="text-gray-400 text-xl">
                   <span>›</span>
